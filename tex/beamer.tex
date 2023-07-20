@@ -1,0 +1,378 @@
+\documentclass[aspectratio=169]{beamer}
+\setbeamertemplate{caption}[numbered]
+\setbeamertemplate{footline}[frame number]
+\setbeamertemplate{navigation symbols}{}
+
+\usetheme{Stanford}
+
+\usepackage[english]{babel}
+\usepackage[utf8]{inputenc} 
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{adjustbox}
+\usepackage{latexsym,amsmath,amssymb,amsfonts,bm} 
+\usepackage{textcomp}
+\usepackage{multirow}
+\usepackage{pgffor}
+\usepackage{tikz}
+\usetikzlibrary{er,positioning}
+\usepackage{tabu}
+\usepackage{ragged2e}
+\usepackage{appendixnumberbeamer}
+\usefonttheme[stillsansserifsmall]{serif}
+\usepackage{newcent}
+\usepackage{color}
+\usepackage{xcolor}
+\usepackage{multicol}
+\usepackage{verbatim}
+\usepackage{tikz}
+\usetikzlibrary{backgrounds,fit,trees,arrows,decorations.pathreplacing}
+\usepackage{subcaption}
+\usepackage[flushleft]{threeparttable}
+\usepackage{array}
+\usepackage[capposition=top]{floatrow}
+
+
+\usepackage{stata}
+
+
+\aboverulesep=0ex
+\belowrulesep=0ex
+\renewcommand{\arraystretch}{1.05}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\title[Generalized 2SLS]{ \textbf{G2SLS: Generalized 2SLS procedure for Stata}}
+\author[Nicolas Suarez (Stanford University)]{Nicolas Suarez-Chavarria}
+\institute[Stanford University]
+{\large{Stanford University}}
+\date[]{\today}
+
+
+
+\begin{document}
+\frame{\titlepage}
+
+\begin{frame}{Preview}
+\begin{itemize}
+\item I implement the generalized two-stage least squares procedure described in Bramoullé et al. (2009) to estimate peer effects models.
+\pause
+\item I extend their original framework to estimate peer effects models using OLS and to allow for independent variables without peer effects.
+\pause
+\item Short application to showcase the \texttt{2gsls} package.
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{Outline}
+  \tableofcontents
+\end{frame}
+
+\section{Motivation}
+
+\begin{frame}{Motivation}
+\begin{itemize}
+\item If we want to estimate a linear-in-means regression, there are no readily available packages to do so.
+\pause
+\item Computing the mean outcomes and characteristics of peers with loops is hard and inefficient.
+\pause 
+\item To address this and the endogeneity problems in linear-in-means models, I developed the \texttt{2gsls} package.
+\end{itemize}
+\end{frame}
+
+
+\section{Context}
+\begin{frame}{Context}{Peer effects}
+Peer effects can be classified into 3 categories:
+\pause
+\begin{itemize}
+\item \textbf{Exogenous (or contextual) effects:} influence of exogenous peer characteristics on my outcomes.
+\item \textbf{Endogenous effects:} influence of peer outcomes on my outcomes.
+\item \textbf{Correlated effects:} individuals in the same reference group behave similarly because they face a common environment.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Context}{Peer effects}
+There are 2 main challenges when estimating a peer effects model:
+\pause
+\begin{enumerate}
+\item It is difficult to distinguish real social effects (endogenous and exogenous) from correlated effects.
+\item Reflection problem: Individuals simultaneously determine each other's outcomes. This endogeneity makes hard to distinguish between endogenous and exogenous effects.
+\end{enumerate}
+\pause
+Generalized Two-Stage Least Squares tackles these 2 problems:
+\pause
+\begin{enumerate}
+\item Adding network-level fixed effects controls for unobserved factors that affect individuals in the same group.
+\item Using instrumental variables based on the network structure takes care of the endogeneity problem.
+\end{enumerate}
+\end{frame}
+
+\begin{frame}{Context}{Econometric framework}
+We start with a simple linear-in-means model:
+\begin{equation}
+y_i = \alpha + \textcolor<2>{red}{\beta} \frac{1}{n_i} \sum_{j \in P_i} y_j + \gamma x_i  + \textcolor<3>{red}{\delta}  \frac{1}{n_i} \sum_{j \in P_i} x_j + \varepsilon_i
+\label{eq1}
+\end{equation}
+\begin{itemize}
+\item $P_i$ are the peers of individual $i$.
+\pause
+\item $\textcolor<2>{red}{\beta}$ captures the endogenous peer effect.
+\pause
+\item $\textcolor<3>{red}{\delta}$ captures exogenous peer effects.
+\end{itemize}
+
+\end{frame}
+
+
+\begin{frame}{Context}{Econometric framework}
+We can rewrite this more generally using matrices:
+\begin{equation}
+y = \alpha \iota +  \textcolor<2>{red}{G} y \beta + X \gamma  +  \textcolor<2>{red}{G} X \delta + \varepsilon
+\label{eq2}
+\end{equation}
+\pause
+\begin{itemize}
+\item $\textcolor<2>{red}{G}$ is an $N$-by-$N$ adjacency matrix representing the relationships between peers.
+\pause
+\item The $i$-th row of $G$ captures the relationship of individual $i$ with his peers. 
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Context}{Generalized Two-Stage Least Squares}
+\begin{itemize}
+\item Bramoullé et al. (2009) developed a procedure to estimate equation \eqref{eq2}.
+\pause
+\item We will rewrite our model as follows:
+\begin{align*}
+y & = \begin{bmatrix} \iota & Gy & X & GX \end{bmatrix} \begin{bmatrix} \alpha \\ \beta \\ \gamma \\ \delta  \end{bmatrix} + \varepsilon \\
+\Leftrightarrow y & = \tilde{X} \theta + \varepsilon
+\end{align*}
+\item This model is identified if matrices $I$, $G$ and $G^2$ are linearly independent.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Context}{Generalized Two-Stage Least Squares}
+We follow these steps:
+\begin{enumerate}
+\item We define our instrument $ S = \begin{bmatrix} \iota & X & GX & G^2X \end{bmatrix} $ for $\tilde{X}$.
+\pause
+\item We estimate our model using 2SLS: 
+$$\textcolor{red}{\hat{\theta}_{2SLS}}= (\tilde{X}' P \tilde{X})^{-1} \tilde{X}' P y  $$
+with $P=S (S'S)^{-1} S'$.
+\pause
+\item We compute the predicted value of the outcome as:
+$$ \textcolor{red}{\hat{y}_{2SLS}} = (I- \textcolor{red}{\hat{\beta}_{2SLS}} G)^{-1} \left(\textcolor{red}{\hat{\alpha}_{2SLS}}  + X \textcolor{red}{\hat{\gamma}_{2SLS}}  +  G X \textcolor{red}{\hat{\delta}_{2SLS}}  \right) $$
+\end{enumerate}
+\end{frame}
+
+
+\begin{frame}{Context}{Generalized Two-Stage Least Squares}
+\begin{itemize}
+\item[4.] We build a new instrument for $\tilde{X}$:
+$$\hat{Z}=\begin{bmatrix} \iota & G \ \textcolor{red}{\hat{y}_{2SLS}} & X & GX \end{bmatrix}$$
+\pause 
+\item[5.] We get our final estimator using standard IV:
+$$ \textcolor{red}{\hat{\beta}_{G2SLS}} = (\hat{Z}'\tilde{X})^{-1} \hat{Z}'y$$
+$$ \textcolor{red}{V\left(\hat{\beta}_{G2SLS}\right)} = (\hat{Z}'\tilde{X})^{-1} \hat{Z}'\ D \ \hat{Z} (\hat{Z}'\tilde{X})^{-1}$$
+where $D$ is a diagonal matrix with the squared resids produced by $\hat{\beta}_{G2SLS}$.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Context}{Variations to the model: Fixed effects} \label<2>{main}
+\begin{itemize}
+\item Bramoullé et al. (2009) also present a version of this model with network-specific unobservable factors:
+\begin{equation}
+y = \textcolor{red}{\sum_{l \in G} \alpha_l} +  {G} y \beta + X \gamma  + {G} X \delta + \varepsilon
+\label{eq3}
+\end{equation}
+where $\alpha_l$ is common to all individuals in the $l$-th component of the network. 
+\pause 
+\item We can transform this model by multiplying it by $(I-G)$ to get rid of these unobservable effects. \hyperlink{fe_details}{\beamergotobutton{G2SLS with FE details}}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Context}{Variations to the model: Direct effects}
+\begin{itemize}
+\item I extended the previous framework to allow for independent variables without peer effects:
+
+$$y = \alpha +  {G} y \beta + X_1 \gamma  + {G} X_1 \delta  + \textcolor<2>{red}{X_2 \psi} + \varepsilon$$
+
+\pause
+\item $\textcolor{red}{\psi}$ captures the effects of our direct variables $\textcolor{red}{X_2}$.
+\end{itemize}
+\end{frame}
+
+\section{Implementation}
+\begin{frame}{Implementation}{G2SLS syntax}
+  \scalebox{1}{\begin{minipage}{\hsize}
+      \begin{stsyntax}
+        g2sls
+        \depvar\
+        {\it indepvars}\
+        \optif\
+        \optin\
+        ,
+        \underbar{adj}acency(Mata matrix)
+        \optional{\underbar{row}
+          \underbar{fixed}
+          \underbar{ols}
+          \underbar{dir}ectvariables(\varlist)
+          \underbar{level}(\num)}    
+      \end{stsyntax}
+  \end{minipage}}\\
+  \vspace{0.5cm}
+  \pause
+  \textbf{Options}:
+  \begin{itemize}
+  \item \texttt{adjacency}: Mata matrix containing an $N$ by $N$ matrix of adjancency.
+  \item \texttt{row}: row normalizes the adjacency matrix, so each row sums 1.
+  \item \texttt{fixed}: adds component-level fixed effects.
+  \item \texttt{ols}: reports OLS results instead of IV.
+  \item \texttt{directvariables}: independent variables that will not have an exogenous effect.
+  \item \texttt{level}: set confidence level for reported confidence intervals.
+  \end{itemize}
+\end{frame}
+
+\section{Application}
+\begin{frame}{Application}{Context}
+\begin{itemize}
+\item Peer effects for college students in Chile between 2012 and 2019.
+\pause
+\item 8 cohorts of approximately 500 students each from the Business and Economics school of the University of Chile.
+\pause 
+\item Students are randomly assigned to their first semester classes. We define their peers as the students they share at least 1 class with.
+\pause 
+\item Our adjacency matrix will be block diagonal, with each cohort being represented by a block.
+\end{itemize}
+
+\end{frame}
+
+
+\begin{frame}{Application}{Data}
+\adjustbox{max width= 0.85\linewidth, center,trim=0 0 1.2cm 0, clip=true}{
+    \begin{minipage}{\hsize}
+    \begin{stlog}
+      \input{../logs/log1.log.tex} 
+    \end{stlog}
+    \end{minipage}}
+\end{frame}
+
+\begin{frame}{Application}{Standard IV model}
+\adjustbox{max width= \linewidth, center}{
+    \begin{minipage}{\hsize}
+    \begin{stlog}
+      \input{../logs/log2.log.tex} 
+    \end{stlog}
+    \end{minipage}}
+\end{frame}
+
+\begin{frame}{Application}{IV model with fixed effects}
+\adjustbox{max width= \linewidth, center}{
+    \begin{minipage}{\hsize}
+    \begin{stlog}
+      \input{../logs/log3.log.tex} 
+    \end{stlog}
+    \end{minipage}}
+\end{frame}
+
+\begin{frame}{Application}{OLS model}
+\adjustbox{max width=\linewidth, center}{
+    \begin{minipage}{\hsize}
+    \begin{stlog}
+      \input{../logs/log4.log.tex} 
+    \end{stlog}
+    \end{minipage}}
+\end{frame}
+
+\begin{frame}{Application}{IV model with direct effects}
+\adjustbox{max width= \linewidth, center,}{
+    \begin{minipage}{\hsize}
+    \begin{stlog}
+      \input{../logs/log5.log.tex} 
+    \end{stlog}
+    \end{minipage}}
+\end{frame}
+
+\begin{frame}{Application}{Presenting results}
+We can use \textbf{\texttt{estimates store}} and \textbf{\texttt{estout}} to organize our results:\\
+\vspace{0.37cm}
+\centering
+\adjustbox{max width= 0.8\linewidth, center}{
+  \begin{tabular}{c|ccc|ccc}
+\toprule
+\textbf{Variable} & \multicolumn{3}{|c|}{\textbf{OLS}} & \multicolumn{3}{|c}{\textbf{G2SLS}} \\
+\midrule
+\csname @@input\endcsname "results.tex"
+\midrule
+\textbf{Cohort level fixed effects} & No &  Yes &  Yes &  No &  Yes &  Yes  \\
+\bottomrule
+\end{tabular}%
+}
+\end{frame}
+
+
+\section{Concluding remarks}
+
+
+
+\begin{frame}
+  \begin{center}
+  \Huge \textbf{Thank you!}
+  \end{center}
+
+
+  nsuarez@stanford.edu
+\end{frame}
+
+
+
+\appendix
+
+
+\begin{frame}{References}
+\begin{itemize}
+\item Bramoullé, Y., Djebbari, H., \& Fortin, B. (2009). Identification of peer effects through social networks. Journal of econometrics, 150(1), 41-55.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Generalized Two-Stage Least Squares}{Model with fixed effects} \label{fe_details}
+\begin{itemize}
+\item We start by pre-multiplying equation \eqref{eq3} by $(I-G)$:
+$$(I-G) y = (I-G) {G} y \beta + (I-G) X \gamma  + (I-G) {G} X \delta + \varepsilon$$
+\item We will rewrite our model as follows:
+\begin{align*}
+(I-G) y & = \begin{bmatrix} (I-G) Gy & (I-G) X & (I-G) GX \end{bmatrix} \begin{bmatrix} \beta \\ \gamma \\ \delta  \end{bmatrix} + \varepsilon \\
+\Leftrightarrow (I-G) y & = \tilde{X} \theta + \varepsilon
+\end{align*}
+\item This model is identified if matrices $I$, $G$, $G^2$ and $G^3$ are linearly independent.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Generalized Two-Stage Least Squares}{Model with fixed effects}
+We follow these steps:
+\begin{enumerate}
+\item We define our instrument $ S = \begin{bmatrix} (I-G) X & (I-G) GX & (I-G) G^2X \end{bmatrix} $ for $\tilde{X}$.
+\item We estimate our model using 2SLS: 
+$$\textcolor{red}{\hat{\theta}_{2SLS}}= (\tilde{X}' P \tilde{X})^{-1} \tilde{X}' P (I-G) y  $$
+with $P=S (S'S)^{-1} S'$.
+\item We compute the predicted value of the outcome as:
+$$ \textcolor{red}{\hat{y}_{2SLS}} = (I-G)^{-1}(I- \textcolor{red}{\hat{\beta}_{2SLS}} G)^{-1} (I-G) \left(\ X \textcolor{red}{\hat{\gamma}_{2SLS}}  +  G X \textcolor{red}{\hat{\delta}_{2SLS}}  \right) $$
+\end{enumerate}
+\end{frame}
+
+
+\begin{frame}{Generalized Two-Stage Least Squares}{Model with fixed effects}
+\begin{itemize}
+\item[4.] We build a new instrument for $\tilde{X}$:
+$$\hat{Z}=\begin{bmatrix} (I-G) G \ \textcolor{red}{\hat{y}_{2SLS}} & (I-G)X & (I-G)GX \end{bmatrix}$$
+\item[5.] We get our final estimator using standard IV:
+$$ \textcolor{red}{\hat{\beta}_{G2SLS}} = (\hat{Z}'\tilde{X})^{-1} \hat{Z}'(I-G)y$$
+$$ \textcolor{red}{V\left(\hat{\beta}_{G2SLS}\right)} = (\hat{Z}'\tilde{X})^{-1} \hat{Z}'\ D \ \hat{Z} (\hat{Z}'\tilde{X})^{-1}$$
+where $D$ is a diagonal matrix with the squared resids produced by $\hat{\beta}_{G2SLS}$.
+\end{itemize}
+\hyperlink{main}{\beamerreturnbutton{back}}
+\end{frame}
+
+
+\end{document}
+

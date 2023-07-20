@@ -1,0 +1,23 @@
+. describe gpa_first adm_score aff_action female major*
+{\smallskip}
+Variable      Storage   Display    Value
+    name         type    format    label      Variable label
+\HLI{176}
+gpa_first       float   \%9.0g                 First semester GPA
+adm_score       float   \%9.0g                 Admission score
+aff_action      byte    \%9.0g                 Affirmative action
+female          byte    \%9.0g                 Female
+major_econ      float   \%9.0g                 Major in Economics
+major_buss      float   \%9.0g                 Major in Business
+{\smallskip}
+. list gpa_first adm_score aff_action female major* in 1/5
+{\smallskip}
+     {\TLC}\HLI{65}{\TRC}
+     {\VBAR} gpa_first   adm_score   aff_ac{\tytilde}n   female   major_{\tytilde}n   major_{\tytilde}s {\VBAR}
+     {\LFTT}\HLI{65}{\RGTT}
+  1. {\VBAR}  .1698871   -1.262415          0        1          0          0 {\VBAR}
+  2. {\VBAR}  .7442471      .44189          0        0          1          0 {\VBAR}
+  3. {\VBAR} -2.991099    .4029151          0        0          0          0 {\VBAR}
+  4. {\VBAR}  .4959475    2.504061          0        0          1          0 {\VBAR}
+  5. {\VBAR}  .7618809    2.822953          0        0          1          0 {\VBAR}
+     {\BLC}\HLI{65}{\BRC}
