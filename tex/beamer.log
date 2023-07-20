@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.23 (MiKTeX 21.8) (preloaded format=pdflatex 2021.9.6)  20 JUL 2023 00:45
+This is pdfTeX, Version 3.141592653-2.6-1.40.23 (MiKTeX 21.8) (preloaded format=pdflatex 2021.9.6)  20 JUL 2023 00:59
 entering extended mode
 **"C:/Users/nsuar/Dropbox/peer effects/stata_conference/tex/beamer.tex"
 (C:/Users/nsuar/Dropbox/peer effects/stata_conference/tex/beamer.tex
@@ -1897,13 +1897,19 @@ Overfull \hbox (4.7835pt too wide) has occurred while \output is active
 [43
 
 ]
+<QR.png, id=330, 983.675pt x 983.675pt>
+File: QR.png Graphic file (type png)
+<use QR.png>
+Package pdftex.def Info: QR.png  used on input line 327.
+(pdftex.def)             Requested size: 137.71356pt x 137.71356pt.
+
 Overfull \hbox (4.7835pt too wide) has occurred while \output is active
  [][]  
  []
 
 [44
 
-]
+ <./QR.png>]
 Overfull \hbox (4.7835pt too wide) has occurred while \output is active
  [][]  
  []
@@ -1946,10 +1952,10 @@ Package rerunfilecheck Info: File `beamer.out' has not changed.
 (rerunfilecheck)             Checksum: D0395B5C5441516FF16A415CBFBBFC8D;599.
  ) 
 Here is how much of TeX's memory you used:
- 31498 strings out of 478893
- 612955 string characters out of 2849010
- 924366 words of memory out of 3000000
- 48511 multiletter control sequences out of 15000+600000
+ 31506 strings out of 478893
+ 613032 string characters out of 2849010
+ 924367 words of memory out of 3000000
+ 48517 multiletter control sequences out of 15000+600000
  475765 words of font info for 134 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  128i,21n,131p,507b,599s stack positions out of 5000i,500n,10000p,200000b,80000s
@@ -1968,9 +1974,9 @@ rw/courier/ucrr8a.pfb><C:/Users/nsuar/AppData/Local/Programs/MiKTeX 2.9/fonts/t
 ype1/urw/ncntrsbk/uncb8a.pfb><C:/Users/nsuar/AppData/Local/Programs/MiKTeX 2.9/
 fonts/type1/urw/ncntrsbk/uncr8a.pfb><C:/Users/nsuar/AppData/Local/Programs/MiKT
 eX 2.9/fonts/type1/urw/ncntrsbk/uncri8a.pfb>
-Output written on beamer.pdf (48 pages, 249714 bytes).
+Output written on beamer.pdf (48 pages, 263590 bytes).
 PDF statistics:
- 438 PDF objects out of 1000 (max. 8388607)
+ 439 PDF objects out of 1000 (max. 8388607)
  108 named destinations out of 1000 (max. 500000)
- 91 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 96 words of extra memory for PDF output out of 10000 (max. 10000000)
 
