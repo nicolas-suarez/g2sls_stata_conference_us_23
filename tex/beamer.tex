@@ -42,9 +42,9 @@
 \renewcommand{\arraystretch}{1.05}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \title[Generalized 2SLS]{ \textbf{G2SLS: Generalized 2SLS procedure for Stata}}
-\author[Nicolas Suarez (Stanford University)]{Nicolas Suarez-Chavarria}
+\author[Nicolas Suarez (Stanford University)]{Nicolas Suarez Chavarria}
 \institute[Stanford University]
-{\large{Stanford University}}
+{\large{Department of Economics, Stanford University}}
 \date[]{\today}
 
 
@@ -313,7 +313,13 @@ We can use \textbf{\texttt{estimates store}} and \textbf{\texttt{estout}} to org
 
 \section{Concluding remarks}
 
-
+\begin{frame}{Concluding remarks}
+\begin{itemize}
+\item I implement the generalized two-stage least squares in Stata to estimate peer effects models.
+\item The \texttt{g2sls} command allows for network fixed effects, OLS estimates with network-weighted variables and direct effects.
+\item \textbf{Future steps}: Implement a weak instruments tests for this context.
+\end{itemize}
+\end{frame}
 
 \begin{frame}
   \begin{center}
