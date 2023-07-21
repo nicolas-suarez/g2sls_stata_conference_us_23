@@ -1,3 +1,5 @@
+*! version 1.01 20jun2023
+
 capture program drop g2sls
 program define g2sls, eclass
 	version 18
